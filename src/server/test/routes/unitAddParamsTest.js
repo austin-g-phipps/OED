@@ -66,7 +66,7 @@ mocha.describe('Units Add Parameter Validation', () => {
 		mocha.it('should validate string field lengths', async () => {
 			const lengthOnlyFields = [
 				{ field: 'name', maxLength: STRING_SHORT_MAX_LENGTH },
-				{ field: 'identifier', maxLength: STRING_GENERAL_MAX_LENGTH }
+				{ field: 'identifier', maxLength: STRING_SHORT_MAX_LENGTH }
 			];
 
 			for (const { field, maxLength } of lengthOnlyFields) {
@@ -80,30 +80,47 @@ mocha.describe('Units Add Parameter Validation', () => {
 				});
 			}
 		});
+		
+		mocha.it('should validate remaining string field maximum lengths', async () => {
+			const stringFieldTests = [
+				{ field: 'suffix', maxLength: STRING_SHORT_MAX_LENGTH },
+				{ field: 'note', maxLength: STRING_GENERAL_MAX_LENGTH }
+			];
+
+			for (const { field, maxLength } of stringFieldTests) {
+				await testInvalidField({
+					field,
+					invalidValue: 'x'.repeat(maxLength + 1),
+					endpoint: ADD_ENDPOINT,
+					basePayload: baseUnitData,
+					expectedStatus: HTTP_CODES.FORBIDDEN
+				});
+			}
+		});
 
 		mocha.it('should validate enum-like string fields', async () => {
 			const enumLikeFields = [
 				{
 					field: 'unitRepresent',
-					maxLength: STRING_GENERAL_MAX_LENGTH,
+					maxLength: STRING_SHORT_MAX_LENGTH,
 					enumValues: ['quantity', 'flow', 'raw'],
 					additionalInvalidEnumValues: ['INVALID', 'invalid', 'volume', 'rate', '']
 				},
 				{
 					field: 'typeOfUnit',
-					maxLength: STRING_GENERAL_MAX_LENGTH,
+					maxLength: STRING_SHORT_MAX_LENGTH,
 					enumValues: ['unit', 'meter', 'suffix'],
 					additionalInvalidEnumValues: ['INVALID', 'invalid', 'group', 'reading', '']
 				},
 				{
 					field: 'displayable',
-					maxLength: STRING_GENERAL_MAX_LENGTH,
+					maxLength: STRING_SHORT_MAX_LENGTH,
 					enumValues: ['none', 'all', 'admin'],
 					additionalInvalidEnumValues: ['INVALID', 'invalid', 'public', 'private', '']
 				},
 				{
 					field: 'disableChecks',
-					maxLength: STRING_GENERAL_MAX_LENGTH,
+					maxLength: STRING_SHORT_MAX_LENGTH,
 					enumValues: ['reject_disabled', 'reject_bad', 'reject_all', 'reject_none'],
 					additionalInvalidEnumValues: ['INVALID', 'invalid', 'reject', 'disable', '']
 				}
