@@ -100,7 +100,7 @@ mocha.describe('Units Edit Parameter Validation', () => {
 			});
 		});
 
-		mocha.it('should validate string field lengths', async () => {
+		mocha.it('should validate required string field minimum lengths', async () => {
 			// Test name field length (minLength: 1)
 			await testInvalidField({
 				field: 'name',
@@ -154,6 +154,30 @@ mocha.describe('Units Edit Parameter Validation', () => {
 				basePayload: baseUnitData,
 				expectedStatus: HTTP_CODES.FORBIDDEN
 			});
+		});
+
+		mocha.it('should validate string field maximum lengths', async () => {
+			// Tests for max field lengths according to units.js
+			const stringFieldTests = [
+				{ field: 'name', maxLength: STRING_SHORT_MAX_LENGTH },
+				{ field: 'identifier', maxLength: STRING_SHORT_MAX_LENGTH },
+				{ field: 'unitRepresent', maxLength: STRING_SHORT_MAX_LENGTH },
+				{ field: 'typeOfUnit', maxLength: STRING_SHORT_MAX_LENGTH },
+				{ field: 'suffix', maxLength: STRING_SHORT_MAX_LENGTH },
+				{ field: 'displayable', maxLength: STRING_SHORT_MAX_LENGTH },
+				{ field: 'note', maxLength: STRING_GENERAL_MAX_LENGTH },
+				{ field: 'disableChecks', maxLength: STRING_SHORT_MAX_LENGTH }
+			];
+
+			for (const test of stringFieldTests) {
+				await testInvalidField({
+					field: test.field,
+					invalidValue: 'x'.repeat(test.maxLength + 1),
+					endpoint: EDIT_ENDPOINT,
+					basePayload: baseUnitData,
+					expectedStatus: HTTP_CODES.FORBIDDEN
+				});
+			}
 		});
 
 		mocha.it('should validate enum fields', async () => {
